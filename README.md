@@ -27,7 +27,7 @@ NumCorrect :	Number of correct answers (1 for single choice questions, >1 for mu
 Answer1-Answer6:The potential answers for the question. At most 6 answers are allowed.
 Correct:	The text of the correct answer(s). Multiple correct answers are separated by a |
 Explanation:	An explanation for the correct answer, if applicable.
-#Guidelines for Modifying questions.csv
+### Guidelines for Modifying questions.csv
 Adding Questions: Simply add a new row at the end of the CSV file. Ensure that you maintain the schema format.
 Deleting Questions: Delete the entire row corresponding to the question you wish to remove.
 Modifying Questions: Edit the relevant row in the CSV file.
