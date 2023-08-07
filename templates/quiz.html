@@ -88,11 +88,10 @@
 <div class="container">
     <div class="box">
         <h1>Quiz</h1>
-        <p>check Question #34 #35 #41  </p> 
         
         <h3>{{ question.question_number }}# : {{ question.question_text|safe }}</h3>
-        {% if question.numcorrect != 1 %}
-        <p>Choose : {{ question.numcorrect }} answers</p>
+        {% if question.num_correct != 1 %}
+        <p>Choose : {{ question.num_correct }} answers</p>
         {% endif %}
 
         {% if user_answer %}
