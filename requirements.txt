@@ -1,0 +1,7 @@
+Flask
+pandas
+uwsgi
+MarkupSafe
+Jinja2
+google-cloud-storage
+sqlite3

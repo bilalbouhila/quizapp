@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Results</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            margin: 0;
+        }
+
+        .score-board {
+            padding: 20px;
+            background-color: #7f53ac;
+            color: #fff;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0px 2px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .question-navigation {
+            width: 100%;
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        #question-nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            padding: 0;
+            list-style: none;
+            margin-bottom: 20px;
+        }
+
+        .question-nav-button {
+            margin: 5px;
+            background-color: #7f53ac;
+            color: #fff;
+            border: none;
+            padding: 12px 16px;  /* Increased padding */
+            border-radius: 50%; 
+            box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 16px;  /* Adjust font size */
+        }
+
+        .question-nav-button:hover {
+            background-color: #647dee; 
+        }
+
+        .container {
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-sizing: border-box;
+            overflow: auto;
+            padding: 20px 0;
+        }
+
+        .container.active {
+            display: flex;
+        }
+
+        .box {
+            padding: 20px;
+            margin: 20px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #7f53ac 0%,#647dee 100%);
+            color: #fff;
+            width: 90%;
+            box-sizing: border-box;
+            overflow: auto;
+        }
+
+        .question-container {
+            display: none;
+        }
+
+        .question-container.active {
+            display: block;
+        }
+
+        .correct {
+            color: green;
+        }
+
+        .incorrect {
+            color: red;
+        }
+        .answer-choice {
+        padding: 10px;
+        margin: 5px 0;
+        border: 2px solid #ddd;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+    }
+    .answer-correct {
+        padding: 10px;
+        margin: 5px 0;
+        border: 2px solid green;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+    }
+    .answer-incorrect {
+        padding: 10px;
+        margin: 5px 0;
+        border: 2px solid red;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+    }
+    .badge {
+        display: inline-block;
+        padding: 0.25em 0.4em;
+        font-size: 75%;
+        font-weight: 700;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: 0.25rem;
+    }
+    .badge-success {
+        color: #fff;
+        background-color: #28a745;
+    }
+    .badge-danger {
+        color: #fff;
+        background-color: #dc3545;
+    }
+    .button-container {
+    display: flex;
+    justify-content: space-between; /* or 'center' if you want them centered next to each other */
+    align-items: center; 
+}
+    </style>
+</head>
+<body>
+    <div class="score-board">
+        <h2>Your Score: {{ score }} out of {{ total }}</h2>
+        <h2>Percentage of Correct Answers: {{ percent }}%</h2>
+        <button id="show-corrections">Show Corrections</button>
+    </div>
+
+    <div class="question-navigation">
+        <p>Jump to:</p>
+        <ul id="question-nav">
+            {% for answer in answers %}
+                <li><button class="question-nav-button" data-question-index="{{ loop.index0 }}">{{ answer.question_number }}</button></li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="container" id="corrections-container">
+        {% for answer in answers %}
+    <div class="question-container box">
+        <h3>Question {{ answer.question_number }}# : {{ answer.question }}</h3>
+        <p>All options:</p>
+        {% for option in answer['All options'] %}
+            <div class="{% if option in answer.user_answer and option in answer.correct_answer %}answer-correct
+            {% elif option in answer.correct_answer %}answer-correct
+            {% elif option in answer.user_answer%}answer-incorrect
+            {% else %}answer-choice{% endif %}">
+                {{ option }}
+                {% if option in answer.user_answer %}
+                    <span class="badge {% if option in answer.correct_answer %}badge-success{% else %}badge-danger{% endif %}">
+                        selected
+                    </span>
+                {% endif %}
+            </div>
+        {% endfor %}
+        <p>Explanation: {{ answer.Explanation }}</p>
+    </div>
+{% endfor %}
+        <div class="button-container">
+            <button id="prev-question-button">Previous Question</button>
+            <button id="next-question-button">Next Question</button>
+        </div>
+
+    </div>
+
+    <script>
+        window.onload = function() {
+            let questionContainers = Array.from(document.getElementsByClassName('question-container'));
+            let correctionsContainer = document.getElementById('corrections-container');
+            let showCorrectionsButton = document.getElementById('show-corrections');
+            let prevQuestionButton = document.getElementById('prev-question-button');
+            let nextQuestionButton = document.getElementById('next-question-button');
+            let currentQuestionIndex = 0;
+
+            questionContainers[currentQuestionIndex].classList.add('active');
+            updateNavigationButtons();
+
+            nextQuestionButton.addEventListener('click', function() {
+                goToQuestion(currentQuestionIndex + 1);
+            });
+
+            prevQuestionButton.addEventListener('click', function() {
+                goToQuestion(currentQuestionIndex - 1);
+            });
+
+            showCorrectionsButton.addEventListener('click', function() {
+                correctionsContainer.classList.add('active');
+                showCorrectionsButton.style.display = "none";
+            });
+
+            Array.from(document.getElementsByClassName('question-nav-button')).forEach(function(button) {
+                button.addEventListener('click', function() {
+                    let questionIndex = parseInt(button.getAttribute('data-question-index'));
+                    goToQuestion(questionIndex);
+                });
+            });
+
+            function goToQuestion(index) {
+                questionContainers[currentQuestionIndex].classList.remove('active');
+                currentQuestionIndex = index;
+                questionContainers[currentQuestionIndex].classList.add('active');
+                updateNavigationButtons();
+            }
+
+            function updateNavigationButtons() {
+                prevQuestionButton.style.display = currentQuestionIndex > 0 ? "block" : "none";
+                nextQuestionButton.style.display = currentQuestionIndex < questionContainers.length - 1 ? "block" : "none";
+            }
+        }
+    </script>
+</body>
+</html>

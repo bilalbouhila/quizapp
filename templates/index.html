@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .box {
+            padding: 40px;   /* Increase the padding */
+            border-radius: 15px;
+            background: linear-gradient(135deg, #7f53ac 0%,#647dee 100%);
+            color: #fff;
+            width: 600px;    /* Increase the width */
+        }
+
+        input[type=submit] {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+    </style>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    
+</head>
+<body>
+<div class="container">
+    <div class="box">
+        <h1>Welcome to the Quiz!</h1>
+        <form action="{{ url_for('home') }}" method="POST">
+            <label for="num_questions">Number of Questions (leave blank for all {{ questions|length }}):</label>
+            <input type="number" id="num_questions" name="num_questions" min="1">
+            
+            
+
+            <div>
+                <input type="radio" id="exam_mode" name="mode" value="exam" checked>
+                <label for="exam_mode">Exam Mode</label><br>
+                <input type="radio" id="training_mode_radio" name="mode" value="training">
+                <label for="training_mode_radio">Training Mode</label>
+            </div>
+            <div id="training_mode">
+                <label for="start_range">Start Range (for training mode, same order as examtopic):</label>
+                <input type="number" id="start_range" name="start_range" min="1">
+            </div>
+
+            <input type="submit" value="Start Quiz">
+        </form>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    $('#training_mode').hide();
+
+    $('input[type=radio][name=mode]').change(function() {
+        if (this.value == 'training') {
+            $('#training_mode').show();
+        }
+        else if (this.value == 'exam') {
+            $('#training_mode').hide();
+        }
+    });
+});
+</script>
+
+</body>
+</html>
